@@ -1,0 +1,72 @@
+== Warmup (1x) ==
+Python benchmark suite 1.11.0
+
+Creating the virtual environment /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081
+# /usr/bin/python3 -m venv --without-pip /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081
+# /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/bin/python -m ensurepip -v -U
+Command failed with exit code 1
+Download https://bootstrap.pypa.io/get-pip.py into /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/get-pip.py
+# /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/bin/python -u /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/get-pip.py
+Collecting pip
+  Using cached pip-25.2-py3-none-any.whl.metadata (4.7 kB)
+Collecting setuptools
+  Using cached setuptools-80.9.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting wheel
+  Using cached wheel-0.45.1-py3-none-any.whl.metadata (2.3 kB)
+Using cached pip-25.2-py3-none-any.whl (1.8 MB)
+Using cached setuptools-80.9.0-py3-none-any.whl (1.2 MB)
+Using cached wheel-0.45.1-py3-none-any.whl (72 kB)
+Installing collected packages: wheel, setuptools, pip
+
+Successfully installed pip-25.2 setuptools-80.9.0 wheel-0.45.1
+# /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/bin/python -m pip install -U 'setuptools>=18.5' wheel
+Requirement already satisfied: setuptools>=18.5 in ./venv/cpython3.10-01e0476c9c69-compat-af96b9431081/lib/python3.10/site-packages (80.9.0)
+Requirement already satisfied: wheel in ./venv/cpython3.10-01e0476c9c69-compat-af96b9431081/lib/python3.10/site-packages (0.45.1)
+# /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/bin/python -m pip --version
+pip 25.2 from /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/lib/python3.10/site-packages/pip (python 3.10)
+
+==================================================
+( 1/1) creating venv for benchmark (crypto_pyaes)
+
+(trying common venv first)
+Installing requirements into the virtual environment /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081
+# /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/bin/python -m pip install pyaes==1.6.1 pyperf==2.6.3
+Collecting pyaes==1.6.1
+  Using cached pyaes-1.6.1-py3-none-any.whl
+Collecting pyperf==2.6.3
+  Using cached pyperf-2.6.3-py3-none-any.whl.metadata (6.0 kB)
+Collecting psutil>=5.9.0 (from pyperf==2.6.3)
+  Using cached psutil-7.0.0-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (22 kB)
+Using cached pyperf-2.6.3-py3-none-any.whl (139 kB)
+Using cached psutil-7.0.0-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (277 kB)
+Installing collected packages: pyaes, psutil, pyperf
+
+Successfully installed psutil-7.0.0 pyaes-1.6.1 pyperf-2.6.3
+Installing requirements into the virtual environment /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081
+# /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/bin/python -m pip install psutil
+Requirement already satisfied: psutil in ./venv/cpython3.10-01e0476c9c69-compat-af96b9431081/lib/python3.10/site-packages (7.0.0)
+# /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/bin/python -m pip freeze
+psutil==7.0.0
+pyaes==1.6.1
+pyperf==2.6.3
+# /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/bin/python -m pip freeze
+psutil==7.0.0
+pyaes==1.6.1
+pyperf==2.6.3
+
+[1/1] crypto_pyaes...
+# /root/venv/cpython3.10-01e0476c9c69-compat-af96b9431081/bin/python -u /usr/local/lib/python3.10/dist-packages/pyperformance/data-files/benchmarks/bm_crypto_pyaes/run_benchmark.py --output /tmp/tmphsrsmmol --inherit-environ PYPERFORMANCE_RUNID
+.....................
+crypto_pyaes: Mean +- std dev: 175 ms +- 3 ms
+
+Performance version: 1.11.0
+Python version: 3.10.12 (64-bit)
+Report on Linux-5.15.0-1087-kvm-x86_64-with-glibc2.35
+Number of logical CPUs: 1
+Start date: 2025-09-07 21:09:32.268101
+End date: 2025-09-07 21:09:49.580480
+
+### crypto_pyaes ###
+Mean +- std dev: 175 ms +- 3 ms
+
+IPC=2.462  MPKI=0.02

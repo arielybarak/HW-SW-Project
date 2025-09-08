@@ -1,0 +1,38 @@
+== Warmup (1x) ==
+Python benchmark suite 1.11.0
+
+
+==================================================
+( 1/1) creating venv for benchmark (json_dumps)
+
+(trying common venv first)
+Installing requirements into the virtual environment /root/venv/cpython3.10-c513784c29f1-compat-af96b9431081
+# /root/venv/cpython3.10-c513784c29f1-compat-af96b9431081/bin/python -m pip install pyperf==2.6.3
+Requirement already satisfied: pyperf==2.6.3 in ./venv/cpython3.10-c513784c29f1-compat-af96b9431081/lib/python3.10/site-packages (2.6.3)
+Requirement already satisfied: psutil>=5.9.0 in ./venv/cpython3.10-c513784c29f1-compat-af96b9431081/lib/python3.10/site-packages (from pyperf==2.6.3) (7.0.0)
+Installing requirements into the virtual environment /root/venv/cpython3.10-c513784c29f1-compat-af96b9431081
+# /root/venv/cpython3.10-c513784c29f1-compat-af96b9431081/bin/python -m pip install psutil
+Requirement already satisfied: psutil in ./venv/cpython3.10-c513784c29f1-compat-af96b9431081/lib/python3.10/site-packages (7.0.0)
+# /root/venv/cpython3.10-c513784c29f1-compat-af96b9431081/bin/python -m pip freeze
+psutil==7.0.0
+pyperf==2.6.3
+# /root/venv/cpython3.10-c513784c29f1-compat-af96b9431081/bin/python -m pip freeze
+psutil==7.0.0
+pyperf==2.6.3
+
+[1/1] json_dumps...
+# /root/venv/cpython3.10-c513784c29f1-compat-af96b9431081/bin/python -u /root/venv_after/lib/python3.10/site-packages/pyperformance/data-files/benchmarks/bm_json_dumps/run_benchmark.py --output /tmp/tmpqxixqvun --inherit-environ PYPERFORMANCE_RUNID
+.....................
+json_dumps: Mean +- std dev: 20.0 ms +- 0.2 ms
+
+Performance version: 1.11.0
+Python version: 3.10.12 (64-bit)
+Report on Linux-5.15.0-1087-kvm-x86_64-with-glibc2.35
+Number of logical CPUs: 1
+Start date: 2025-09-07 14:53:00.706453
+End date: 2025-09-07 14:53:16.249342
+
+### json_dumps ###
+Mean +- std dev: 20.0 ms +- 0.2 ms
+
+IPC=2.363  MPKI=0.02

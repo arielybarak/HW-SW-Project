@@ -1,0 +1,8 @@
+# started on Sun Sep  7 14:53:15 2025
+
+45469389065,,cycles:u,18517095735,100.00,,
+107457878177,,instructions:u,18517095735,100.00,2.36,insn per cycle
+308593130,,cache-references:u,18517095735,100.00,,
+1725563,,cache-misses:u,18517095735,100.00,0.559,of all cache refs
+2.363302,,derived:IPC,,
+0.016058,,derived:MPKI,,

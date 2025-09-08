@@ -1,0 +1,6 @@
+=== BEFORE vs AFTER (json_dumps) ===
+Time (mean ms):   BEFORE 175       AFTER 111       | Speedup: x1.577  Improvement: 36.6%
+IPC:              BEFORE 2.462     AFTER 2.411   
+MPKI:             BEFORE 0.02      AFTER 0.01    
+Created: flamegraph_diff.svg
+Wrote summary to comp.txt

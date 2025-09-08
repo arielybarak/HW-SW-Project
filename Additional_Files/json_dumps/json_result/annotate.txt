@@ -1,0 +1,500 @@
+ Percent |	Source code & Disassembly of python3.10 for cycles:u (553 samples, percent: local period)
+---------------------------------------------------------------------------------------------------------
+         :
+         :
+         :
+         : 3     Disassembly of section .text:
+         :
+         : 5     000000000005b8c0 <_PyEval_EvalFrameDefault>:
+         : 6     _PyEval_EvalFrameDefault():
+         : 1578  #endif
+         :
+         :
+         : 1581  PyObject* _Py_HOT_FUNCTION
+         : 1582  _PyEval_EvalFrameDefault(PyThreadState *tstate, PyFrameObject *f, int throwflag)
+         : 1583  {
+    0.19 :   5b8c0:  endbr64
+    0.00 :   5b8c4:  push   %r15
+    0.00 :   5b8c6:  push   %r14
+    0.00 :   5b8c8:  push   %r13
+    0.00 :   5b8ca:  push   %r12
+    0.00 :   5b8cc:  push   %rbp
+    0.00 :   5b8cd:  push   %rbx
+    0.17 :   5b8ce:  sub    $0x158,%rsp
+    0.00 :   5b8d5:  mov    %fs:0x28,%rax
+    0.00 :   5b8de:  mov    %rax,0x148(%rsp)
+    0.19 :   5b8e6:  xor    %eax,%eax
+         : 1595  _Py_EnsureFuncTstateNotNULL():
+         : 94    PyAPI_FUNC(void) _Py_NO_RETURN _Py_FatalError_TstateNULL(const char *func);
+         :
+         : 96    static inline void
+         : 97    _Py_EnsureFuncTstateNotNULL(const char *func, PyThreadState *tstate)
+         : 98    {
+         : 99    if (tstate == NULL) {
+    0.00 :   5b8e8:  test   %rdi,%rdi
+    0.00 :   5b8eb:  je     64df1 <_PyEval_EvalFrameDefault+0x9531>
+         : 102   _PyEval_EvalFrameDefault():
+         : 1595  const _Py_CODEUNIT *next_instr;
+         : 1596  int opcode;        /* Current opcode */
+         : 1597  int oparg;         /* Current opcode argument, if any */
+         : 1598  PyObject **fastlocals, **freevars;
+         : 1599  PyObject *retval = NULL;            /* Return value */
+         : 1600  _Py_atomic_int * const eval_breaker = &tstate->interp->ceval.eval_breaker;
+    0.00 :   5b8f1:  mov    0x10(%rdi),%rcx
+         : 1602  _Py_MakeRecCheck():
+         : 79    return (++tstate->recursion_depth > tstate->interp->ceval.recursion_limit
+         : 80    || ++tstate->stackcheck_counter > 64);
+         : 81    }
+         : 82    #else
+         : 83    static inline int _Py_MakeRecCheck(PyThreadState *tstate) {
+         : 84    return (++tstate->recursion_depth > tstate->interp->ceval.recursion_limit);
+    0.16 :   5b8f5:  mov    0x20(%rdi),%eax
+    0.00 :   5b8f8:  mov    %edx,%r12d
+         : 87    _PyEval_EvalFrameDefault():
+         : 1594  PyObject *retval = NULL;            /* Return value */
+    0.00 :   5b8fb:  mov    %rdi,%rbp
+    0.00 :   5b8fe:  movq   $0x0,0x90(%rsp)
+         : 1595  _Py_atomic_int * const eval_breaker = &tstate->interp->ceval.eval_breaker;
+    0.00 :   5b90a:  mov    %rsi,%rbx
+         : 1597  _Py_MakeRecCheck():
+    0.00 :   5b90d:  mov    0x40(%rcx),%edx
+    0.00 :   5b910:  add    $0x1,%eax
+         : 81    _PyEval_EvalFrameDefault():
+    0.00 :   5b913:  mov    %rcx,0x10(%rsp)
+         : 1596  _Py_MakeRecCheck():
+    0.38 :   5b918:  mov    %eax,0x20(%rdi)
+         : 80    _Py_EnterRecursiveCall():
+         : 89    PyThreadState *tstate,
+         : 90    const char *where);
+         :
+         : 92    static inline int _Py_EnterRecursiveCall(PyThreadState *tstate,
+         : 93    const char *where) {
+         : 94    return (_Py_MakeRecCheck(tstate) && _Py_CheckRecursiveCall(tstate, where));
+    0.00 :   5b91b:  cmp    %edx,%eax
+    0.00 :   5b91d:  jg     5bc00 <_PyEval_EvalFrameDefault+0x340>
+         : 97    _PyEval_EvalFrameDefault():
+         :
+         : 1620  /* WARNING: Because the CFrame lives on the C stack,
+         : 1621  * but can be accessed from a heap allocated object (tstate)
+         : 1622  * strict stack discipline must be maintained.
+         : 1623  */
+         : 1624  CFrame *prev_cframe = tstate->cframe;
+    0.00 :   5b923:  mov    0x30(%rbp),%rdx
+         : 1626  trace_info.cframe.previous = prev_cframe;
+         : 1627  tstate->cframe = &trace_info.cframe;
+         :
+         : 1629  /* push frame */
+         : 1630  tstate->frame = f;
+         : 1631  co = f->f_code;
+    0.00 :   5b927:  mov    0x20(%rbx),%rsi
+         : 1622  tstate->cframe = &trace_info.cframe;
+    0.19 :   5b92b:  lea    0xc0(%rsp),%r8
+         : 1613  trace_info.code = NULL;
+    0.37 :   5b933:  movq   $0x0,0xc0(%rsp)
+         : 1622  tstate->cframe = &trace_info.cframe;
+    0.00 :   5b93f:  mov    %r8,0x18(%rsp)
+         : 1620  trace_info.cframe.use_tracing = prev_cframe->use_tracing;
+    0.10 :   5b944:  mov    (%rdx),%eax
+         : 1621  trace_info.cframe.previous = prev_cframe;
+    0.00 :   5b946:  mov    %rdx,0xf8(%rsp)
+         : 1622  tstate->cframe = &trace_info.cframe;
+    0.00 :   5b94e:  lea    0xf0(%rsp),%rdx
+    0.16 :   5b956:  mov    %rdx,0x30(%rbp)
+         : 1620  trace_info.cframe.use_tracing = prev_cframe->use_tracing;
+    0.00 :   5b95a:  mov    %eax,0xf0(%rsp)
+         : 1625  tstate->frame = f;
+    0.00 :   5b961:  mov    %rbx,0x18(%rbp)
+         : 1626  co = f->f_code;
+    0.00 :   5b965:  mov    %rsi,0x8(%rsp)
+         :
+         : 1629  if (trace_info.cframe.use_tracing) {
+    0.00 :   5b96a:  test   %eax,%eax
+    0.00 :   5b96c:  je     5b9e0 <_PyEval_EvalFrameDefault+0x120>
+         : 1629  if (tstate->c_tracefunc != NULL) {
+    0.00 :   5b96e:  mov    0x40(%rbp),%rdi
+    0.00 :   5b972:  test   %rdi,%rdi
+    0.00 :   5b975:  je     5b9a1 <_PyEval_EvalFrameDefault+0xe1>
+         : 1643  a pointer to the current frame, a string
+         : 1644  indicating why the function is called, and
+         : 1645  an argument which depends on the situation.
+         : 1646  The global trace function is also called
+         : 1647  whenever an exception is detected. */
+         : 1648  if (call_trace_protected(tstate->c_tracefunc,
+    0.00 :   5b977:  sub    $0x8,%rsp
+    0.00 :   5b97b:  mov    0x50(%rbp),%rsi
+    0.00 :   5b97f:  xor    %r9d,%r9d
+    0.00 :   5b982:  mov    %rbx,%rcx
+    0.00 :   5b985:  lea    0x33d934(%rip),%rax        # 3992c0 <_Py_NoneStruct>
+    0.00 :   5b98c:  mov    %rbp,%rdx
+    0.00 :   5b98f:  push   %rax
+    0.00 :   5b990:  call   12bac0 <call_trace_protected>
+    0.00 :   5b995:  pop    %r11
+    0.00 :   5b997:  pop    %r13
+    0.00 :   5b999:  test   %eax,%eax
+    0.00 :   5b99b:  jne    5bb98 <_PyEval_EvalFrameDefault+0x2d8>
+         : 1651  PyTrace_CALL, Py_None)) {
+         : 1652  /* Trace function raised an error */
+         : 1653  goto exit_eval_frame;
+         : 1654  }
+         : 1655  }
+         : 1656  if (tstate->c_profilefunc != NULL) {
+    0.00 :   5b9a1:  mov    0x38(%rbp),%rdi
+    0.00 :   5b9a5:  test   %rdi,%rdi
+    0.00 :   5b9a8:  je     5b9e0 <_PyEval_EvalFrameDefault+0x120>
+         : 1654  /* Similar for c_profilefunc, except it needn't
+         : 1655  return itself and isn't called for "line" events */
+         : 1656  if (call_trace_protected(tstate->c_profilefunc,
+    0.00 :   5b9aa:  sub    $0x8,%rsp
+    0.00 :   5b9ae:  mov    0x48(%rbp),%rsi
+    0.00 :   5b9b2:  xor    %r9d,%r9d
+    0.00 :   5b9b5:  mov    %rbx,%rcx
+    0.00 :   5b9b8:  lea    0x33d901(%rip),%rax        # 3992c0 <_Py_NoneStruct>
+    0.00 :   5b9bf:  mov    %rbp,%rdx
+    0.00 :   5b9c2:  push   %rax
+    0.00 :   5b9c3:  mov    0x28(%rsp),%r8
+    0.00 :   5b9c8:  call   12bac0 <call_trace_protected>
+    0.00 :   5b9cd:  pop    %r9
+    0.00 :   5b9cf:  pop    %r10
+    0.00 :   5b9d1:  test   %eax,%eax
+    0.00 :   5b9d3:  jne    5bb98 <_PyEval_EvalFrameDefault+0x2d8>
+    0.00 :   5b9d9:  nopl   0x0(%rax)
+         : 1667  }
+         :
+         : 1669  if (PyDTrace_FUNCTION_ENTRY_ENABLED())
+         : 1670  dtrace_function_entry(f);
+         :
+         : 1672  names = co->co_names;
+    0.00 :   5b9e0:  mov    0x8(%rsp),%rsi
+         : 1669  consts = co->co_consts;
+         : 1670  fastlocals = f->f_localsplus;
+    0.19 :   5b9e5:  lea    0x160(%rbx),%rcx
+         : 1693  FOR_ITER is effectively a single opcode and f->f_lasti will point
+         : 1694  to the beginning of the combined pair.)
+         : 1695  */
+         : 1696  assert(f->f_lasti >= -1);
+         : 1697  next_instr = first_instr + f->f_lasti + 1;
+         : 1698  stack_pointer = f->f_valuestack + f->f_stackdepth;
+    0.00 :   5b9ec:  movslq 0x50(%rbx),%rdx
+         : 1669  fastlocals = f->f_localsplus;
+    0.00 :   5b9f0:  mov    %rcx,0x38(%rsp)
+         : 1692  next_instr = first_instr + f->f_lasti + 1;
+    0.00 :   5b9f5:  movslq 0x60(%rbx),%r13
+         : 1667  names = co->co_names;
+    0.00 :   5b9f9:  mov    0x40(%rsi),%rax
+    0.19 :   5b9fd:  mov    %rax,0x28(%rsp)
+         : 1668  consts = co->co_consts;
+    0.00 :   5ba02:  mov    0x38(%rsi),%rax
+    0.00 :   5ba06:  mov    %rax,0x40(%rsp)
+         : 1670  freevars = f->f_localsplus + co->co_nlocals;
+    0.16 :   5ba0b:  movslq 0x1c(%rsi),%rax
+    0.00 :   5ba0f:  lea    (%rcx,%rax,8),%rax
+    0.00 :   5ba13:  mov    %rax,0x30(%rsp)
+         : 1675  first_instr = (_Py_CODEUNIT *) PyBytes_AS_STRING(co->co_code);
+    0.00 :   5ba18:  mov    0x30(%rsi),%rax
+         : 1701  Having f_stackdepth <= 0 ensures that invalid
+         : 1702  values are not visible to the cycle GC.
+         : 1703  We choose -1 rather than 0 to assist debugging.
+         : 1704  */
+         : 1705  f->f_stackdepth = -1;
+         : 1706  f->f_state = FRAME_EXECUTING;
+    0.00 :   5ba1c:  movb   $0x0,0x6c(%rbx)
+         : 1675  first_instr = (_Py_CODEUNIT *) PyBytes_AS_STRING(co->co_code);
+    0.00 :   5ba20:  add    $0x20,%rax
+         : 1700  f->f_stackdepth = -1;
+    0.00 :   5ba24:  movl   $0xffffffff,0x50(%rbx)
+         : 1675  first_instr = (_Py_CODEUNIT *) PyBytes_AS_STRING(co->co_code);
+    0.00 :   5ba2b:  mov    %rax,(%rsp)
+         : 1693  stack_pointer = f->f_valuestack + f->f_stackdepth;
+    0.00 :   5ba2f:  mov    0x40(%rbx),%rax
+    0.00 :   5ba33:  lea    (%rax,%rdx,8),%r15
+         :
+         : 1704  if (co->co_opcache_flag < opcache_min_runs) {
+    0.00 :   5ba37:  mov    0xa8(%rsi),%eax
+    0.00 :   5ba3d:  mov    0x344f7d(%rip),%edx        # 3a09c0 <opcache_min_runs>
+    0.00 :   5ba43:  cmp    %edx,%eax
+    0.00 :   5ba45:  jl     5bb70 <_PyEval_EvalFrameDefault+0x2b0>
+         : 1728  }
+         : 1729  lltrace = r;
+         : 1730  }
+         : 1731  #endif
+         :
+         : 1733  if (throwflag) { /* support for generator.throw() */
+    0.00 :   5ba4b:  test   %r12d,%r12d
+    0.00 :   5ba4e:  jne    5bc30 <_PyEval_EvalFrameDefault+0x370>
+         : 1692  next_instr = first_instr + f->f_lasti + 1;
+    0.16 :   5ba54:  mov    (%rsp),%rax
+    0.19 :   5ba58:  lea    0x2(%rax,%r13,2),%r14
+         : 1753  ``pending.calls_to_do'' is set, i.e. when an asynchronous
+         : 1754  event needs attention (e.g. a signal handler or
+         : 1755  async I/O handler); see Py_AddPendingCall() and
+         : 1756  Py_MakePendingCalls() above. */
+         :
+         : 1758  if (_Py_atomic_load_relaxed(eval_breaker)) {
+    0.55 :   5ba5d:  mov    0x10(%rsp),%rax
+    0.00 :   5ba62:  add    $0x44,%rax
+    0.00 :   5ba66:  mov    %rax,0x20(%rsp)
+    0.00 :   5ba6b:  mov    0x20(%rsp),%rax
+    0.00 :   5ba70:  mov    (%rax),%eax
+         : 1754  opcode = _Py_OPCODE(*next_instr);
+    0.00 :   5ba72:  movzwl (%r14),%r9d
+    1.46 :   5ba76:  movzbl %r9b,%r13d
+         : 1753  if (_Py_atomic_load_relaxed(eval_breaker)) {
+    0.00 :   5ba7a:  test   %eax,%eax
+    0.00 :   5ba7c:  je     5bb08 <_PyEval_EvalFrameDefault+0x248>
+         : 1754  opcode = _Py_OPCODE(*next_instr);
+    0.00 :   5ba82:  movzbl %r9b,%eax
+         : 1755  if (opcode != SETUP_FINALLY &&
+    0.00 :   5ba86:  cmp    $0x7a,%r9b
+    0.00 :   5ba8a:  je     5bb08 <_PyEval_EvalFrameDefault+0x248>
+    0.00 :   5ba8c:  cmp    $0x8f,%eax
+    0.00 :   5ba91:  je     5bb08 <_PyEval_EvalFrameDefault+0x248>
+         : 1757  opcode != SETUP_WITH &&
+         : 1758  opcode != BEFORE_ASYNC_WITH &&
+    0.00 :   5ba93:  cmp    $0x34,%eax
+    0.00 :   5ba96:  je     5bb08 <_PyEval_EvalFrameDefault+0x248>
+    0.00 :   5ba98:  cmp    $0x48,%eax
+    0.00 :   5ba9b:  je     5bb08 <_PyEval_EvalFrameDefault+0x248>
+         : 1763  eval_frame_handle_pending():
+         : 1165  if (_Py_atomic_load_relaxed(&ceval->signals_pending)) {
+    0.00 :   5ba9d:  mov    0x3631d5(%rip),%eax        # 3bec78 <_PyRuntime+0x158>
+    0.00 :   5baa3:  test   %eax,%eax
+    0.00 :   5baa5:  jne    5c320 <_PyEval_EvalFrameDefault+0xa60>
+    0.00 :   5baab:  mov    0x10(%rbp),%r13
+         : 1173  if (_Py_atomic_load_relaxed(&ceval2->pending.calls_to_do)) {
+    0.00 :   5baaf:  mov    0x58(%r13),%eax
+    0.00 :   5bab3:  test   %eax,%eax
+    0.00 :   5bab5:  je     5bae1 <_PyEval_EvalFrameDefault+0x221>
+         : 1177  _Py_IsMainThread():
+         : 19    unsigned long thread = PyThread_get_thread_ident();
+    0.00 :   5bab7:  call   1827d0 <PyThread_get_thread_ident>
+         : 21    make_pending_calls():
+         : 704   if (!_Py_ThreadCanHandlePendingCalls()) {
+    0.00 :   5babc:  cmp    0x3630a5(%rip),%rax        # 3beb68 <_PyRuntime+0x48>
+    0.00 :   5bac3:  jne    5bae1 <_PyEval_EvalFrameDefault+0x221>
+         : 710   if (busy) {
+    0.00 :   5bac5:  mov    0x365dc4(%rip),%r8d        # 3c1890 <busy.20>
+    0.00 :   5bacc:  test   %r8d,%r8d
+    0.00 :   5bacf:  jne    5bae1 <_PyEval_EvalFrameDefault+0x221>
+    0.00 :   5bad1:  mov    %r13,%rdi
+    0.00 :   5bad4:  call   12b900 <make_pending_calls.part.0>
+         : 716   eval_frame_handle_pending():
+         : 1174  if (make_pending_calls(tstate->interp) != 0) {
+    0.00 :   5bad9:  test   %eax,%eax
+    0.00 :   5badb:  jne    64aff <_PyEval_EvalFrameDefault+0x923f>
+         : 1180  if (_Py_atomic_load_relaxed(&ceval2->gil_drop_request)) {
+    0.00 :   5bae1:  mov    0x48(%r13),%eax
+    0.00 :   5bae5:  test   %eax,%eax
+    0.00 :   5bae7:  jne    60f48 <_PyEval_EvalFrameDefault+0x5688>
+         : 1201  if (tstate->async_exc != NULL) {
+    0.00 :   5baed:  mov    0xa8(%rbp),%r12
+    0.00 :   5baf4:  test   %r12,%r12
+    0.00 :   5baf7:  jne    6564d <_PyEval_EvalFrameDefault+0x9d8d>
+         : 1205  _PyEval_EvalFrameDefault():
+         :
+         : 1786  tracing_dispatch:
+         : 1787  {
+         : 1788  int instr_prev = f->f_lasti;
+         : 1789  f->f_lasti = INSTR_OFFSET();
+         : 1790  NEXTOPARG();
+    0.00 :   5bafd:  movzwl (%r14),%r9d
+    0.00 :   5bb01:  movzbl %r9b,%r13d
+    0.00 :   5bb05:  nopl   (%rax)
+         : 1792  if (PyDTrace_LINE_ENABLED())
+         : 1793  maybe_dtrace_line(f, &trace_info, instr_prev);
+         :
+         : 1795  /* line-by-line tracing support */
+         :
+         : 1797  if (trace_info.cframe.use_tracing &&
+    0.00 :   5bb08:  mov    0xf0(%rsp),%eax
+    0.00 :   5bb0f:  lea    0x2(%r14),%rsi
+         : 1784  f->f_lasti = INSTR_OFFSET();
+    0.00 :   5bb13:  sub    (%rsp),%r14
+         : 1785  NEXTOPARG();
+    0.00 :   5bb17:  shr    $0x8,%r9w
+         : 1783  int instr_prev = f->f_lasti;
+    0.00 :   5bb1c:  mov    0x60(%rbx),%edx
+         : 1784  f->f_lasti = INSTR_OFFSET();
+    0.00 :   5bb1f:  sar    %r14
+         : 1785  NEXTOPARG();
+    0.19 :   5bb22:  movzwl %r9w,%r9d
+         : 1784  f->f_lasti = INSTR_OFFSET();
+    0.00 :   5bb26:  mov    %r14d,0x60(%rbx)
+         : 1785  NEXTOPARG();
+    0.00 :   5bb2a:  mov    %rsi,%r14
+         : 1792  if (trace_info.cframe.use_tracing &&
+    0.00 :   5bb2d:  test   %eax,%eax
+    0.00 :   5bb2f:  je     5bb45 <_PyEval_EvalFrameDefault+0x285>
+         : 1793  tstate->c_tracefunc != NULL && !tstate->tracing) {
+    0.00 :   5bb31:  mov    0x40(%rbp),%r8
+         : 1792  if (trace_info.cframe.use_tracing &&
+    0.00 :   5bb35:  test   %r8,%r8
+    0.00 :   5bb38:  je     5bb45 <_PyEval_EvalFrameDefault+0x285>
+         : 1793  tstate->c_tracefunc != NULL && !tstate->tracing) {
+    0.00 :   5bb3a:  mov    0x2c(%rbp),%edi
+    0.00 :   5bb3d:  test   %edi,%edi
+    0.00 :   5bb3f:  je     5bf39 <_PyEval_EvalFrameDefault+0x679>
+         : 1848  lastopcode = opcode;
+         : 1849  #endif
+         : 1850  dxp[opcode]++;
+         : 1851  #endif
+         :
+         : 1853  switch (opcode) {
+    0.00 :   5bb45:  cmp    $0xa5,%r13d
+    0.00 :   5bb4c:  ja     5c2aa <_PyEval_EvalFrameDefault+0x9ea>
+    0.00 :   5bb52:  lea    0x275727(%rip),%rdx        # 2d1280 <warnings_warn__doc__+0x1220>
+    0.00 :   5bb59:  mov    %r13d,%eax
+    0.00 :   5bb5c:  movslq (%rdx,%rax,4),%rax
+    0.54 :   5bb60:  add    %rdx,%rax
+    0.19 :   5bb63:  notrack jmp *%rax
+    0.00 :   5bb66:  cs nopw 0x0(%rax,%rax,1)
+         : 1704  co->co_opcache_flag++;
+    0.00 :   5bb70:  add    $0x1,%eax
+    0.00 :   5bb73:  mov    %eax,0xa8(%rsi)
+         : 1705  if (co->co_opcache_flag == opcache_min_runs) {
+    0.00 :   5bb79:  cmp    %eax,%edx
+    0.00 :   5bb7b:  jne    5ba4b <_PyEval_EvalFrameDefault+0x18b>
+         : 1706  if (_PyCode_InitOpcache(co) < 0) {
+    0.00 :   5bb81:  mov    %rsi,%rdi
+    0.00 :   5bb84:  call   21e480 <_PyCode_InitOpcache>
+    0.00 :   5bb89:  test   %eax,%eax
+    0.00 :   5bb8b:  jns    5ba4b <_PyEval_EvalFrameDefault+0x18b>
+    0.00 :   5bb91:  nopl   0x0(%rax)
+         :
+         : 4545  /* pop frame */
+         : 4546  exit_eval_frame:
+         : 4547  /* Restore previous cframe */
+         : 4548  tstate->cframe = trace_info.cframe.previous;
+         : 4549  tstate->cframe->use_tracing = trace_info.cframe.use_tracing;
+    0.00 :   5bb98:  mov    0xf0(%rsp),%eax
+         : 4551  if (PyDTrace_FUNCTION_RETURN_ENABLED())
+         : 4552  dtrace_function_return(f);
+         : 4553  _Py_LeaveRecursiveCall(tstate);
+         : 4554  tstate->frame = f->f_back;
+         :
+         : 4556  return _Py_CheckFunctionResult(tstate, NULL, retval, __func__);
+    0.00 :   5bb9f:  mov    0x90(%rsp),%rdx
+         : 4543  tstate->cframe = trace_info.cframe.previous;
+    0.19 :   5bba7:  mov    0xf8(%rsp),%rcx
+         : 4551  return _Py_CheckFunctionResult(tstate, NULL, retval, __func__);
+    0.00 :   5bbaf:  xor    %esi,%esi
+    0.00 :   5bbb1:  mov    %rbp,%rdi
+         : 4543  tstate->cframe = trace_info.cframe.previous;
+    0.00 :   5bbb4:  mov    %rcx,0x30(%rbp)
+         : 4544  tstate->cframe->use_tracing = trace_info.cframe.use_tracing;
+    0.19 :   5bbb8:  mov    %eax,(%rcx)
+         : 4549  tstate->frame = f->f_back;
+    0.00 :   5bbba:  mov    0x18(%rbx),%rax
+         : 4551  return _Py_CheckFunctionResult(tstate, NULL, retval, __func__);
+    0.00 :   5bbbe:  lea    0x27597b(%rip),%rcx        # 2d1540 <__func__.18>
+         : 4553  _Py_LeaveRecursiveCall():
+         : 100   }
+         :
+         : 102   #define Py_EnterRecursiveCall(where) _Py_EnterRecursiveCall_inline(where)
+         :
+         : 104   static inline void _Py_LeaveRecursiveCall(PyThreadState *tstate)  {
+         : 105   tstate->recursion_depth--;
+    0.00 :   5bbc5:  subl   $0x1,0x20(%rbp)
+         : 107   _PyEval_EvalFrameDefault():
+         : 4549  tstate->frame = f->f_back;
+    0.35 :   5bbc9:  mov    %rax,0x18(%rbp)
+         : 4551  return _Py_CheckFunctionResult(tstate, NULL, retval, __func__);
+    0.00 :   5bbcd:  call   74770 <_Py_CheckFunctionResult>
+         : 4552  }
+    0.00 :   5bbd2:  mov    0x148(%rsp),%rdx
+    0.37 :   5bbda:  sub    %fs:0x28,%rdx
+    0.00 :   5bbe3:  jne    64dfd <_PyEval_EvalFrameDefault+0x953d>
+    0.19 :   5bbe9:  add    $0x158,%rsp
+    0.00 :   5bbf0:  pop    %rbx
+    0.38 :   5bbf1:  pop    %rbp
+    0.00 :   5bbf2:  pop    %r12
+    0.00 :   5bbf4:  pop    %r13
+    0.00 :   5bbf6:  pop    %r14
+    0.00 :   5bbf8:  pop    %r15
+    0.19 :   5bbfa:  ret
+    0.00 :   5bbfb:  nopl   0x0(%rax,%rax,1)
+         : 4565  _Py_CheckRecursiveCall():
+         : 872   if (tstate->recursion_headroom) {
+    0.00 :   5bc00:  mov    0x24(%rdi),%r14d
+    0.00 :   5bc04:  test   %r14d,%r14d
+    0.00 :   5bc07:  je     5bef9 <_PyEval_EvalFrameDefault+0x639>
+         : 873   if (tstate->recursion_depth > recursion_limit + 50) {
+    0.00 :   5bc0d:  add    $0x32,%edx
+    0.00 :   5bc10:  cmp    %edx,%eax
+    0.00 :   5bc12:  jle    5b923 <_PyEval_EvalFrameDefault+0x63>
+         : 875   Py_FatalError("Cannot recover from stack overflow.");
+    0.00 :   5bc18:  lea    0x274879(%rip),%rsi        # 2d0498 <warnings_warn__doc__+0x438>
+    0.00 :   5bc1f:  lea    0x27593a(%rip),%rdi        # 2d1560 <__func__.19>
+    0.00 :   5bc26:  call   16dae0 <_Py_FatalErrorFunc>
+    0.00 :   5bc2b:  nopl   0x0(%rax,%rax,1)
+         : 880   _PyErr_Occurred():
+         : 14    #endif
+         :
+         : 16    static inline PyObject* _PyErr_Occurred(PyThreadState *tstate)
+         : 17    {
+         : 18    assert(tstate != NULL);
+         : 19    return tstate->curexc_type;
+    0.00 :   5bc30:  mov    0x58(%rbp),%rax
+         : 21    _PyEval_EvalFrameDefault():
+         : 4437  if (!_PyErr_Occurred(tstate)) {
+    0.00 :   5bc34:  test   %rax,%rax
+    0.00 :   5bc37:  je     60f0d <_PyEval_EvalFrameDefault+0x564d>
+         : 4446  PyTraceBack_Here(f);
+    0.00 :   5bc3d:  mov    %rbx,%rdi
+    0.00 :   5bc40:  call   184520 <PyTraceBack_Here>
+         : 4448  if (tstate->c_tracefunc != NULL) {
+    0.00 :   5bc45:  mov    0x40(%rbp),%rdi
+    0.00 :   5bc49:  test   %rdi,%rdi
+    0.00 :   5bc4c:  je     5bc66 <_PyEval_EvalFrameDefault+0x3a6>
+         : 4451  f->f_state = FRAME_UNWINDING;
+    0.00 :   5bc4e:  movb   $0x2,0x6c(%rbx)
+         : 4452  call_exc_trace(tstate->c_tracefunc, tstate->c_traceobj,
+    0.00 :   5bc52:  mov    0x18(%rsp),%r8
+    0.00 :   5bc57:  mov    %rbx,%rcx
+    0.00 :   5bc5a:  mov    %rbp,%rdx
+    0.00 :   5bc5d:  mov    0x50(%rbp),%rsi
+    0.00 :   5bc61:  call   12bc70 <call_exc_trace>
+         : 4458  while (f->f_iblock > 0) {
+    0.00 :   5bc66:  mov    0x68(%rbx),%r12d
+         : 4518  while (!EMPTY()) {
+    0.00 :   5bc6a:  mov    0x40(%rbx),%rcx
+         : 4456  f->f_state = FRAME_UNWINDING;
+    0.00 :   5bc6e:  movb   $0x2,0x6c(%rbx)
+         : 4458  while (f->f_iblock > 0) {
+    0.00 :   5bc72:  test   %r12d,%r12d
+    0.00 :   5bc75:  jle    60fa8 <_PyEval_EvalFrameDefault+0x56e8>
+    0.00 :   5bc7b:  nopl   0x0(%rax,%rax,1)
+         : 4460  PyTryBlock *b = &f->f_blockstack[--f->f_iblock];
+    0.00 :   5bc80:  sub    $0x1,%r12d
+    0.00 :   5bc84:  mov    %r12d,0x68(%rbx)
+         : 4462  if (b->b_type == EXCEPT_HANDLER) {
+    0.00 :   5bc88:  movslq %r12d,%r12
+    0.00 :   5bc8b:  lea    (%r12,%r12,2),%rax
+    0.00 :   5bc8f:  lea    (%rbx,%rax,4),%r13
+         : 4466  UNWIND_BLOCK(b);
+    0.00 :   5bc93:  mov    %r15,%rax
+    0.00 :   5bc96:  sub    %rcx,%rax
+         : 4462  if (b->b_type == EXCEPT_HANDLER) {
+    0.00 :   5bc99:  mov    0x70(%r13),%esi
+         : 4466  UNWIND_BLOCK(b);
+    0.00 :   5bc9d:  mov    0x78(%r13),%edx
+    0.00 :   5bca1:  sar    $0x3,%rax
+    0.00 :   5bca5:  mov    %eax,%r8d
+         : 4462  if (b->b_type == EXCEPT_HANDLER) {
+    0.00 :   5bca8:  cmp    $0x101,%esi
+    0.00 :   5bcae:  je     5be40 <_PyEval_EvalFrameDefault+0x580>
+         : 4466  UNWIND_BLOCK(b);
+    0.00 :   5bcb4:  cmp    %eax,%edx
+    0.00 :   5bcb6:  jl     5bcd5 <_PyEval_EvalFrameDefault+0x415>
+    0.00 :   5bcb8:  jmp    5bd00 <_PyEval_EvalFrameDefault+0x440>
+    0.00 :   5bcba:  nopw   0x0(%rax,%rax,1)
+    0.00 :   5bcc0:  mov    0x78(%r13),%edx
+    0.00 :   5bcc4:  mov    %r15,%rax
+    0.00 :   5bcc7:  sub    %rcx,%rax
+    0.00 :   5bcca:  sar    $0x3,%rax
+    0.00 :   5bcce:  mov    %eax,%r8d
+    0.00 :   5bcd1:  cmp    %edx,%eax
+    0.00 :   5bcd3:  jle    5bcf8 <_PyEval_EvalFrameDefault+0x438>
+    0.00 :   5bcd5:  mov    -0x8(%r15),%rdi
+    0.00 :   5bcd9:  sub    $0x8,%r15
+         : 4468  _Py_XDECREF():
+         :
