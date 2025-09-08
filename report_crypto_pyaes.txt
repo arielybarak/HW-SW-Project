@@ -1,0 +1,314 @@
+
+                        (1) Benchmark Analysis (1)
+
+Introduction
+Many real systems need to encrypt data for confidentiality before storing or transmitting it.
+'AES' (Advanced Encryption Standard) is a widely used block cipher. In 'CTR' (Counter) mode,
+it turns the block cipher into a stream of pseudorandom bytes that are XORed with the plaintext.
+'PyAES' is a pure‑Python implementation of AES. In CPython, the 'crypto_pyaes' benchmark in
+pyperformance exercises AES‑CTR with a 128‑bit key by repeatedly encrypting and decrypting buffers using
+PyAES. This makes it a good target to study interpreter overhead, per‑call costs, and the algorithm’s
+hot operations when implemented in Python.
+
+AES in one minute 
+- AES always works on 16 bytes at a time. This 16‑byte chunk is called the state.
+- The key size chooses how many rounds we do:
+  - AES‑128 uses a 16‑byte key and 10 rounds.
+  - AES‑192 uses a 24‑byte key and 12 rounds.
+  - AES‑256 uses a 32‑byte key and 14 rounds.
+
+What a “round” is
+- SubBytes: replace each byte with a value from an S‑box table.
+- ShiftRows: rotate each row of the 4×4 state by 0, 1, 2, and 3 bytes.
+- MixColumns: mix each 4‑byte column to spread information.
+- AddRoundKey: XOR the 16‑byte state with a 16‑byte round key.
+
+How the rounds are arranged
+- Start with an initial AddRoundKey using round key 0.
+- Do full rounds for the middle steps.
+- Do a final round that skips MixColumns and then applies AddRoundKey.
+- In CTR mode we do not encrypt the data directly. We encrypt a counter block to make a keystream and XOR it with the data.
+________________________________________
+Executive Summary
+•	The benchmark measures how fast pure‑Python AES (CTR mode, 128‑bit key) encrypt/decrypt loops run and where time is spent.
+•	Core work: S‑box lookups, MixColumns/SubBytes/ShiftRows rounds, counter block construction, XOR with keystream,
+    and frequent object creation for AES mode/state.
+•	Most cost comes from Python‑level loops, indexing, and per‑call dispatch rather than low‑level CPU instructions.
+•	Replacing parts with native code (C/Rust) or reducing Python dispatch typically shifts time away from the interpreter.
+•	Per iteration, the harness creates a fresh AES object for encrypt and a fresh one for decrypt (to reset CTR state).
+________________________________________
+Purpose & Scope
+The benchmark evaluates the cost of encrypting and decrypting with AES‑CTR in pure Python. It focuses on speed
+(latency and throughput) and, secondarily, memory churn from short‑lived objects. This matters because encryption
+appears in many applications (storage, networking, logging) and Python implementations can become bottlenecks when
+processing large buffers or many small messages.
+________________________________________
+•
+Libraries Used
+•	pyaes: pure‑Python AES implementation providing CTR mode used by the benchmark.
+•	pyperf: microbenchmarking harness for stable timing and metadata (used by the runner).
+•	pyperformance: wraps benchmarks and their execution environment (selected bench: crypto_pyaes).
+________________________________________
+Algorithms
+•	AES rounds: per 16‑byte block, apply SubBytes, ShiftRows, MixColumns (except final round), and AddRoundKey.        //reminder: aes.py:217 (round loop starts), 219 (T-table transform), 223 (AddRoundKey)
+•	Key schedule: expand the user key into round keys used by each round.
+•	CTR mode: build a 16‑byte counter block, encrypt it with AES to produce a keystream block, then XOR with data.
+•	Buffer handling: iterate over the message in 16‑byte chunks; assemble ciphertext; repeat for decrypt (same operation).
+________________________________________
+Data Structures
+•	Bytes/bytearray: plaintext, ciphertext, keys, and intermediate blocks (run_benchmark).
+•	Integers: loop counters and per‑byte operations (indexing, XOR) inside Python loops (aes).
+•	Tables/arrays: S‑box and mix tables accessed during round transformations (aes).
+•	Objects: AES mode/context objects created per iteration in the benchmark harness (run_benchmark).
+________________________________________
+Third-Party Dependencies (if any)
+•	PyAES is pure Python (no compiled extension), so performance is shaped by CPython’s interpreter, attribute lookups,
+    indexing, and allocation behavior.
+•	Runtime factors: frequent small allocations and reference counting; Python’s memory manager and garbage collector can
+    impact throughput; CPU cache locality is indirectly affected by Python object layouts rather than tight C arrays.
+________________________________________
+
+
+
+                        (2) Initial Analysis (2)
+            Performance analysis, flame graphs, profiling data
+
+
+Background summary
+•	Measured mean: 175 ms ± 3 ms for crypto_pyaes (timing.txt)
+•	Perf counters (derived): IPC ≈ 2.462, MPKI ≈ 0.02 (timing.txt)
+•	Memory churn: Lots of short-lived allocations and deallocations (creating and discarding many small temporary objects). It spends
+        time in the allocator, increases pressure on CPU caches, and adds GC/reference-count overhead.
+•	Attribute: A named thing attached to an object, accessed with a dot like obj.name.
+•	Dynamic attribute: An attribute that is looked up at runtime from Python objects and their types rather than a fixed offset known at compile time.
+        In Python most attribute access is dynamic, which is flexible but costs time.
+•	AddRoundKey: Role: Mixes secret key material into the data each round (XOR is fast and reversible, so decrypt can undo it).
+                 It XORs the current 16‑byte state with a 16‑byte round key.
+________________________________________
+Report's findings
+
+1.	Compute‑bound workload (low cache misses)
+•	IPC ≈ 2.46 with MPKI ≈ 0.02 indicates cycles spent in computation, not memory stalls. Reason: very low MPKI.
+
+2.	Interpreter execution dominates
+•	_PyEval_EvalFrameDefault: 25.40% (report_light.txt) — CPython frame evaluation loop is the single largest symbol.
+  Reason: pure‑Python inner loops keep the interpreter busy.
+
+3.	Integer arithmetic and indexing are hot
+•	long_bitwise: 11.36%, long_add: 2.82%, long_mod: 2.63%, and more others.
+•	list_subscript: 4.75%. Reason: AES tables, shifts/masks, and per‑byte XORs are implemented with Python ints and lists. %%%%%%%
+    •	Role: Handles list indexing like lst[i] inside CPython: It checks bounds and returns the element at position i.
+
+4.	Attribute lookups and type machinery add overhead
+•	_PyObject_GenericGetAttrWithDict: 4.17%, _PyType_Lookup: 1.27%.
+    •	GenericGet... role: The generic attribute lookup helper that resolves obj.attr. It walks the type and instance dictionaries,
+        checks descriptors, and returns the attribute. It appears when code does attribute access in hot paths.
+  Reason: dynamic attribute and item access in Python hot paths.    %%%%%%%%%
+
+5.	Object allocation and deallocation are visible costs
+•	_object/new/free signals: _PyLong_New: 2.49%, object_dealloc: 7.13%, and smaller functions such as list_dealloc.
+  Reason: frequent creation of ints/temporaries and method frames in tight loops.
+________________________________________
+Flamegraph's findings
+
+1.	Deep interpreter‑driven call stack
+•	Large share in _PyEval_EvalFrameDefault implies a tall dispatch tower per loop/byte. Reason: Python executes bytecode per step.
+
+2.	Many thin leaves from Python C‑API helpers
+•	Numerous small helpers (long_* ops, lookups) form many narrow leaves, indicating cumulative micro‑costs.
+
+3.	No single giant leaf in native crypto
+•	Pure‑Python AES has no dominant native routine; work spreads across interpreter and int/lookup helpers.
+________________________________________
+Conclusions & Suggestions
+
+•	Hotspots are interpreter dispatch, Python int ops, and indexing/attribute lookups.
+  Reason: top symbols concentrate in _PyEval_EvalFrameDefault and long_*/subscript functions.
+•	Reducing Python‑level work per byte likely helps: fewer object creations, fewer attribute/lookups, tighter loops.
+  Examples (future work, not used for this BEFORE analysis): reuse AES context where allowed, batch XOR on larger chunks,
+  precompute keystream blocks, hoist lookups to locals, or move inner loops to native code.
+
+________________________________________
+
+
+
+
+                    (3) Optimizations (3)
+
+
+1.	Bind hot attributes to locals (both encrypt/decrypt)
+Role: Avoid repeated dynamic attribute lookups in the hot loop.
+Before: Each table access used `self.T1`, `self.T2`, `self.S`, etc., and round keys via `self._Ke`/`self._Kd`.
+Optimization: Assign locals once at function entry, e.g., `T1=self.T1; ...; ke=self._Ke` (encrypt: lines ~206–210; decrypt: ~267–271).
+Effect: Fewer attribute lookups per iteration; reduces _PyObject_GenericGetAttrWithDict and _PyType_Lookup activity.
+
+2.	Inline initial pack and AddRoundKey (both)
+Role: Convert 16 input bytes to four 32‑bit words then XOR with round key 0.
+Before: Built a small list by slicing 4 bytes at a time, packing them into a 32‑bit number, then XORing with the first round key entry. This used a comprehension and temporary lists.
+After: It directly packs the first 16 input bytes into four integers t0..t3 using shifts and ORs, then XORs each with the key entries.
+Optimization: Manual packing into `t0..t3` with shifts and ors then XOR with `ke[0][i]`/`kd[0][i]` (encrypt: 214–217; decrypt: 275–278 in aes_after.py).
+Effect: Fewer temporary lists and slices. Just 4 integer calculations and 4 XORs. Less Python overhead in a hot spot. straight‑line ops.
+
+3.	Scalar 4‑word state and explicit rotation (round loop)
+Role: Core T‑table round transformation with ShiftRows‑style rotation and AddRoundKey.
+Before: The code kept the state in a list and used expressions like (i + s1) % 4 inside the inner loop to rotate positions. It also copied lists each round.
+After: It keeps the state in four variables t0..t3. It computes the next a0..a3 directly from those four values with the right rotation pattern, then assigns back to t0..t3.
+Optimization: Keep state in `t0..t3`; compute `a0..a3`; assign `t0, t1, t2, t3 = a0, a1, a2, a3`  (very simple).
+Effect: No modulo arithmetic, no list indexing, and no list copies in the inner loop. Just work with four integers
+
+4.	Preallocate output and unroll final round (no MixColumns)
+Before: Build the 16 output bytes in a loop with appends. Repeatedly index the last round key each iteration.
+After: Allocate result = [0]*16 once, take rk = ke[rounds] or kd[rounds], then write result[0] … result[15] directly with the correct S‑box lookups.
+Effect: No loop overhead. No list append cost. Fewer repeated key lookups. Better cache locality because the code walks data in a straight line.
+________________________________________
+
+Techniques used (across functions)
+•	Local binding: cache `self` attributes (tables, round keys) into locals to avoid dynamic lookups.
+•	Scalar state: keep 4 words in variables (t0..t3) instead of lists to cut indexing and modulo.
+•	Inline packing: build 32‑bit words from bytes with shifts/ORs, then XOR with round key 0.
+•	Loop simplification: remove `% 4` rotations and `copy.copy`; assign next state directly.
+•	Final‑round unroll: preallocate result array and write 16 outputs explicitly.
+•	Allocation trimming: fewer temporaries, fewer list appends, fewer transient objects.
+
+________________________________________
+
+
+
+
+                    (4) Performance Comparison (4)
+
+Summary
+•	Time mean: BEFORE 175 ms  AFTER 111 ms  → Speedup x1.577  Improvement 36.6% (comp.txt)
+•	IPC: BEFORE 2.462  AFTER 2.411  → small decrease
+•	MPKI: BEFORE 0.02  AFTER 0.01  → still very low
+
+Item                                       | BEFORE  | AFTER   | Δ (abs) | Δ%     | Notes
+-------------------------------------------+---------+---------+---------+--------+-------------------------
+Time mean (ms)                              | 175.00  | 111.00  | -64.00  | -36.6% | comp.txt
+IPC                                         | 2.462   | 2.411   | -0.051  |  -2.1% | comp.txt
+MPKI                                        | 0.020   | 0.010   | -0.010  | -50.0% | comp.txt
+
+Overhead%: _PyEval_EvalFrameDefault         | 25.40   | 22.66   | -2.74   | -10.8% | interpreter dispatch
+Overhead%: long_bitwise                     | 11.36   | 15.21   | +3.85   | +33.9% | int shifts and XOR share up
+Overhead%: list_subscript                   | 4.75    | 4.64    | -0.11   |  -2.3% | fewer indexing ops
+Overhead%: _PyObject_GenericGetAttrWithDict | 4.17    | 1.05    | -3.12   | -74.8% | local binding of tables
+Overhead%: long_mod                         | 2.63    |  —      |   —     |   —    | modulo rotations removed
+Overhead%: _PyLong_New                      | 2.49    | 3.86    | +1.37   | +55.0% | more temporary integers
+Overhead%: object_dealloc                   | 7.13    | 8.77    | +1.64   | +23.0% | more object churn
+Overhead%: __memmove_avx_unaligned_erms_rtm | 0.45    | 0.31    | -0.14   | -31.1% | minor factor
+
+Interpretation
+•	End to end speed improved by about 37% while staying compute bound. 
+    The slight IPC drop suggests the optimized Python code executes more simple integer operations per cycle but overall does less total work per message.
+
+Insights
+•	Shifted the work to arithmetic: Interpreter share dropped (EvalFrame 25.40% → 22.66%) while integer ops rose (long_bitwise 11.36% → 15.21%). 
+    This is what we wanted from scalarization and unrolling.
+•	Removed a whole class of costs: Modulo in the inner loop vanished from the top list (long_mod 2.63% → not present). 
+    Eliminating (i + s) % 4 inside the round loop paid off.
+•	Attribute lookup largely neutralized: _PyObject_GenericGetAttrWithDict fell sharply (4.17% → 1.05%). 
+    Local binding of self.T*, self.S, and round keys worked as intended.
+•	Allocation churn is now a visible limiter: _PyLong_New and object_dealloc grew (2.49% → 3.86%, 7.13% → 8.77%). 
+    Manual packing and more explicit arithmetic create many temporary Python integers. Next gains likely require fewer temporaries or moving inner rounds to native code.
+
+Flamegraph diff (visual)
+•	Green reductions around attribute lookup and list operations. Red increases around integer shift and bitwise paths. 
+    Overall area under user space shrinks which matches the faster runtime.
+
+Takeaways
+•	The optimizations traded dynamic lookups and list mechanics for straight integer math. This reduces interpreter dispatch but raises the share of long_* helpers which is a good trade at the whole program level given the sizable speedup.
+•	Further gains would likely come from reducing integer allocation churn and reusing buffers where safe or from moving the inner round to native code.
+
+________________________________________
+
+
+
+
+
+                    (5) Hardware Acceleration Proposal (5)
+
+Goal
+Design a small AES‑CTR stream accelerator to offload the pure‑Python AES round work. 
+It should process long byte streams efficiently and leave Python to orchestrate.
+
+What it accelerates
+•	AES round function on 16‑byte blocks using a preexpanded key schedule
+•	CTR mode keystream generation and XOR with plaintext or ciphertext
+•	Data movement for large buffers via DMA
+_______________________________________
+Inputs and outputs
+•	Inputs: key (128‑bit), initial counter value or nonce, input buffer address and length, mode = encrypt or decrypt
+•	Output: writes result buffer to RAM and a completion record with bytes processed
+_______________________________________
+HW/SW interface
+•	Placement: SoC. Connect it using PCIe.
+•	Job queue: Let's reuse our idea for cyclic queue as we did in json_dumps report.
+        Each job has key id or inline key, counter start, src addr, dst addr, length
+•	DMA: reads input and writes output in large bursts to avoid the CPU becoming memory bound
+•	Driver: tiny kernel driver plus a user space library that enqueues jobs and polls or waits on interrupts
+_______________________________________
+Why it speeds things up
+•	Removes Python integer math and list indexing from the hot loop. Hardware runs one round per cycle or better using wide tables or logic
+•	Streams data in big chunks. Fewer branches and fewer calls than per byte Python code
+•	Keeps the key schedule on chip. No repeated key lookups from Python objects
+•	Our AFTER runtime is 111 ms. If 60% of that is block math (Because integer ops long_bitwise = 15.21, Indexing list_subscript 4.64, interpreter frame 22.66 (not pure math but still...)) 
+    and XOR and hardware runs that part 5× faster: 
+•	Amdahl gives 1  (0.40 + 0.60  5) ≈ 1.92× overall. That would reduce 111 ms to about 58 ms
+
+_______________________________________
+Concept primer
+•	Preexpanded key: expand the AES key once into all round keys and reuse them for every block. Example: AES-128 makes 11 round keys rk[0]..rk[10]
+•	AES round: works on 16 bytes called the state. A full round does SubBytes, ShiftRows, MixColumns, AddRoundKey. The final round skips MixColumns
+•	Back of the envelope: a quick estimate using big buckets and Amdahl's Law to gauge likely speedup without deep modeling
+
+________________________________________
+Block diagram
+
+                +------------------------------+
+                |            CPU               |
+                |        (Python app)          |
+                +--------------+---------------+
+                               |
+                     jobs: {key slot, nonce,
+                      src addr, dst addr, len,
+                      mode = enc or dec}
+                               |
+                               v
+                +--------------+---------------+
+                |      Job Ring in System RAM  |
+                +--------------+---------------+
+                               |
+                               v   (DMA reads jobs and data)
+                +--------------+---------------+
+                |      AES-CTR Accelerator     |
+                |  +------------------------+  |
+                |  |  Key Schedule Store    |  |  load once per key
+                |  +------------------------+  |
+                |  |  Counter Unit          |  |  builds 16-byte counters
+                |  +------------------------+  |
+                |  |  AES Round Core        |  |  runs rounds on counters
+                |  +------------------------+  |
+                |  |  XOR Merge             |  |  keystream XOR data
+                |  +------------------------+  |
+                |  |  Control + DMA Engine  |  |  burst read and write
+                |  +------------------------+  |
+                +--------------+---------------+
+                               |
+                        (DMA writes results)
+                               v
+                +--------------+---------------+
+                |           Output RAM         |
+                +------------------------------+
+
+    CPU (Python)  →  Job descriptors in RAM  →  AES‑CTR Accelerator  →  DMA to output buffer
+                              ↑                           |
+                              └──────────── Interrupt or poll ───────┘
+
+Performance area power trade offs
+•	Performance: Very high throughput on long messages by streaming many blocks per microsecond. Small messages gain less due to setup cost
+•	Area: An AES core with key schedule and a DMA engine is modest compared to a CPU core
+•	Power: Streaming logic is efficient but the extra hardware and DMA traffic add some power. Batching reduces per job overhead
+
+Integration plan
+•	Phase 1: Provide a CPython C extension that falls back to PyAES for small messages and uses the accelerator for big messages
+•	Phase 2: Extend pyperformance bench to route encrypt decrypt calls through the extension to measure end to end gains

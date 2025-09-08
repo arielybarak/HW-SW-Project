@@ -16,15 +16,24 @@ Quick Start (Linux)
 - PyAES
   - `cd Additional_Files/crypto_pyaes`
   - Baseline: `./crypto_perf.sh`
-  - After: follow this folder’s README (e.g., `crypto_aesSwitch.sh` and/or `crypto_benchSwitch.sh`), then `./crypto_perf.sh after`
+  - After: follow this folder’s README (for example `crypto_aesSwitch.sh` and `crypto_benchSwitch.sh`), then `./crypto_perf.sh after`
   - Compare using `../../compare.sh`
+
+Top-level one-shot scripts
+- From repo root you can also run:
+  - `./script_json_dumps.sh` to run the JSON dumps pipeline
+  - `./script_crypto_pyaes.sh` to run the PyAES pipeline
 
 Docs
 - JSON dumps: `Additional_Files/json_dumps/README.md`
 - PyAES: `Additional_Files/crypto_pyaes/README.md`
 - Project overview: `Project.md`
 
-Results (included samples)
+Reports and results
+- JSON report: `report_json_dumps.txt`
+- PyAES report: `report_crypto_pyaes.txt`
+
+Included samples
 - JSON: `Additional_Files/json_dumps/json_result`
 - PyAES: `Additional_Files/crypto_pyaes/crypto_result`
 
