@@ -18,17 +18,6 @@ Run: Baseline
 - Outputs (current dir): `timing.txt`, `perf_stat.csv`, `report_light.txt`, `annotate.txt`, `flamegraph.svg`, folded stacks.
 
 
-Run: After (Python‑level benchmark change)
-1) Copy `after_benchmark.py`, `aes_after.py` into your directory - expected path `/root/aes_after.py`
-2) Run the scripts `crypto_benchSwitch.sh`, `crypto_aesSwitch.sh`
-3) Run the perf script using the flag "after" `./crypto_perf.sh after`
-- Outputs (current dir): `timing_after.txt`, `perf_stat_after.csv`, `report_light_after.txt`, `annotate_after.txt`, `flamegraph_after.svg`, folded stacks.
-4) Compare by running `./compare.sh` from Additional_Files
-- output comp.txt
-5) If executed on QEMU, download results to your local from ssh browser: run `./ssh_transfer.sh`
-
-
-
 Run: After (Python‑level changes)
 1) Copy /json_dumps_workspace/cpython_source/_json.c into your directory - expected path `/root/_json.c`
 2) Run script `json_jsonSwitch.sh`
